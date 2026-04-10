@@ -1,0 +1,112 @@
+================================================================
+  清单 · Listify — 极简待办清单应用
+  A Minimal To-Do List Application
+================================================================
+
+【简介 / About】
+
+清单·Listify 是一款以"纸质笔记本美学"为设计理念的待办清单应用。
+它拒绝浮夸，只保留你真正需要的东西：记录任务、追踪进度、保持专注。
+
+Listify is a minimalist to-do app inspired by the quiet aesthetics
+of a paper notebook. No clutter, no distractions — just you and
+the things you need to get done.
+
+----------------------------------------------------------------
+
+【核心功能 / Core Features】
+
+  · 添加 / 删除 / 标记完成任务
+    Add, delete, mark tasks as done
+
+  · 三级优先级：普通 / 重要 / 紧急
+    Three priority levels: Normal / Important / Urgent
+
+  · 深色模式 & 浅色模式切换
+    Dark mode & Light mode toggle
+
+  · 六种界面语言
+    Six interface languages:
+    简体中文 · English · 日本語 · Français · Español · 한국어
+
+  · 任务数据本地保存（无需联网）
+    Local data storage — works completely offline
+
+  · JSON 文件导入 / 导出（数据属于你）
+    JSON import / export — your data stays yours
+
+  · 进度可视化（进度条 + 统计数字）
+    Progress visualization (progress bar + stats)
+
+  · 任务内容可直接编辑
+    Inline task editing
+
+----------------------------------------------------------------
+
+【使用方式 / How to Use】
+
+  推荐方式（Web）：
+  - 用浏览器打开 todo-app.html 即可，无需安装
+  Recommended (Web):
+  - Simply open todo-app.html in any browser, no installation needed
+
+  桌面版（Python）：
+  - 安装 Python 3.8+，运行 python todo_app.py
+  Desktop (Python):
+  - Requires Python 3.8+, run: python todo_app.py
+
+  打包为可执行文件（exe/app）：
+  Build executable:
+  - pip install pyinstaller
+  - pyinstaller --onefile --windowed --name Listify todo_app.py
+
+----------------------------------------------------------------
+
+【文件列表 / File List】
+
+  todo-app.html   主应用程序（浏览器版）/ Main web application
+  index.html      宣传首页 / Promotional landing page
+  todo_app.py     Python 源代码 / Python desktop source code
+  README.md       详细说明文档 / Detailed documentation
+  intro.txt       本文件 / This file
+
+----------------------------------------------------------------
+
+【技术信息 / Technical Info】
+
+  Web 版:  HTML5 + CSS3 + Vanilla JavaScript（零依赖，单文件）
+           Zero dependencies, single file, fully offline-capable
+
+  桌面版:  Python 3.8+ + Tkinter（标准库，无额外安装）
+           Python standard library only, no extra packages needed
+
+  字体:    Cormorant Garamond + DM Mono（通过 Google Fonts 加载）
+           Loaded via Google Fonts (requires internet on first load)
+
+  数据:    localStorage（Web）/ ~/.listify_data.json（桌面版）
+           localStorage (Web) / ~/.listify_data.json (Desktop)
+
+----------------------------------------------------------------
+
+【设计理念 / Design Philosophy】
+
+  "安静，但不沉默。极简，但不空洞。"
+
+  灵感来自一本翻旧了的纸质笔记本——暖白的纸张，深炭的字迹，
+  橙棕的书签带。数字工具不必冰冷，它也可以有温度。
+
+  "Quiet, but not silent. Minimal, but not empty."
+
+  Inspired by a well-worn paper notebook — warm cream pages,
+  deep charcoal ink, a warm amber ribbon bookmark.
+  Digital tools don't have to feel cold.
+
+----------------------------------------------------------------
+
+【许可 / License】
+
+  MIT License — 自由使用、修改、分发 / Free to use, modify, share.
+
+================================================================
+  清单·Listify  /  把每一天整理得有序  /  One day at a time.
+================================================================

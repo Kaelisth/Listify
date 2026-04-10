@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清单 · Listify — 极简待办清单</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=DM+Mono:wght@300;400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F1EB;
+    --warm:  #EDE9E2;
+    --text:  #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9890;
+    --accent:#8B6F47;
+    --acc2:  #C49A6C;
+    --white: #FFFFFF;
+    --border:#D8D2C8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'DM Mono', 'Noto Sans SC', monospace;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(245,241,235,.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(216,210,200,.4);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .nav-logo em { color: var(--accent); font-style: italic; }
+  .nav-cta {
+    padding: 9px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    letter-spacing: .08em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .nav-cta:hover { background: var(--acc2); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(196,154,108,.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    animation: fadeUp .8s ease both;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 24px;
+    animation: fadeUp .8s .1s ease both;
+  }
+  .hero-title em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    max-width: 480px;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--text2);
+    margin-bottom: 44px;
+    animation: fadeUp .8s .2s ease both;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp .8s .3s ease both;
+  }
+  .btn-primary {
+    padding: 14px 32px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    letter-spacing: .08em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .22s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--acc2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,111,71,.25); }
+  .btn-outline {
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    letter-spacing: .08em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .22s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  /* MOCKUP */
+  .mockup-wrap {
+    margin-top: 64px;
+    animation: fadeUp .8s .4s ease both;
+  }
+  .mockup {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06), 0 20px 60px rgba(0,0,0,.08);
+    max-width: 380px;
+    text-align: left;
+    margin: 0 auto;
+  }
+  .mockup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .mockup-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; }
+  .mockup-logo em { color: var(--accent); font-style: italic; }
+  .mockup-controls { display: flex; gap: 6px; }
+  .mockup-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .d1 { background: #F0857A; } .d2 { background: #E8C06C; } .d3 { background: #82C784; }
+  .mockup-stats { display: flex; gap: 0; background: var(--warm); border-radius: 8px; padding: 10px 0; margin-bottom: 16px; }
+  .ms { flex: 1; text-align: center; }
+  .ms-n { font-size: 1.2rem; font-weight: 500; color: var(--accent); font-family: 'Cormorant Garamond', serif; line-height: 1; }
+  .ms-l { font-size: 0.55rem; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+  .ms-div { width: 1px; background: var(--border); }
+  .mockup-input { background: var(--warm); border-radius: 7px; padding: 10px 14px; font-size: 0.72rem; color: var(--text3); margin-bottom: 14px; }
+  .mockup-tasks { display: flex; flex-direction: column; gap: 7px; }
+  .mt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--warm); border-radius: 7px; }
+  .mt.done { opacity: .45; }
+  .mt-cb { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .mt.done .mt-cb { background: var(--accent); border-color: var(--accent); font-size: .55rem; color: #fff; }
+  .mt-text { font-size: 0.72rem; color: var(--text); }
+  .mt.done .mt-text { text-decoration: line-through; color: var(--text3); }
+  .mt-badge { margin-left: auto; font-size: 0.55rem; padding: 2px 7px; border-radius: 10px; }
+  .badge-urgent { background: #FAEAE8; color: #C0574A; }
+  .badge-high { background: #FFF0E0; color: #B06020; }
+  .mt-bar { width: 3px; height: 32px; border-radius: 2px; flex-shrink: 0; align-self: stretch; }
+  .bar-urgent { background: #C0574A; }
+  .bar-high { background: #E8A060; }
+
+  /* FEATURES */
+  .features {
+    padding: 100px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .section-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 60px;
+    max-width: 500px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    transition: transform .22s, box-shadow .22s;
+  }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,.08); }
+  .feature-icon { font-size: 1.6rem; margin-bottom: 14px; }
+  .feature-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; margin-bottom: 8px; }
+  .feature-desc { font-size: 0.78rem; color: var(--text2); line-height: 1.7; }
+
+  /* LANGS */
+  .langs-section {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 24px;
+  }
+  .langs-inner { max-width: 760px; margin: 0 auto; text-align: center; }
+  .langs-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; margin-bottom: 32px; }
+  .langs-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .lang-pill {
+    padding: 10px 20px;
+    background: var(--warm);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.82rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+  }
+  .lang-pill:hover { border-color: var(--accent); color: var(--accent); background: #F0E8DC; }
+
+  /* CTA SECTION */
+  .cta-section {
+    padding: 100px 24px;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .cta-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 400; line-height: 1.1; margin-bottom: 20px; }
+  .cta-title em { font-style: italic; color: var(--accent); }
+  .cta-sub { font-size: 0.82rem; color: var(--text2); margin-bottom: 36px; line-height: 1.7; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+  .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text3); }
+  .footer-logo em { color: var(--accent); font-style: italic; }
+  .footer-note { font-size: 0.65rem; color: var(--text3); letter-spacing: .06em; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .hero-title { font-size: 2.4rem; }
+    footer { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">清单<em>·</em>list</div>
+  <a class="nav-cta" href="todo-app.html">立即使用 →</a>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">极简 · 优雅 · 高效</p>
+  <h1 class="hero-title">把每一天<br>整理得<em>有序</em></h1>
+  <p class="hero-sub">一款像纸质笔记本一样安静的待办清单。没有噪音，没有干扰——只有你和你需要做的事。</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="todo-app.html">开始使用</a>
+    <a class="btn-outline" href="#features">了解更多</a>
+  </div>
+
+  <div class="mockup-wrap">
+    <div class="mockup">
+      <div class="mockup-header">
+        <div class="mockup-logo">清单<em>·</em>list</div>
+        <div class="mockup-controls"><div class="mockup-dot d1"></div><div class="mockup-dot d2"></div><div class="mockup-dot d3"></div></div>
+      </div>
+      <div class="mockup-stats">
+        <div class="ms"><div class="ms-n">5</div><div class="ms-l">全部</div></div>
+        <div class="ms-div"></div>
+        <div class="ms"><div class="ms-n">3</div><div class="ms-l">待完成</div></div>
+        <div class="ms-div"></div>
+        <div class="ms"><div class="ms-n">2</div><div class="ms-l">已完成</div></div>
+      </div>
+      <div class="mockup-input">添加一件事...</div>
+      <div class="mockup-tasks">
+        <div class="mt">
+          <div class="mt-bar bar-urgent"></div>
+          <div class="mt-cb"></div>
+          <div class="mt-text">向设计师确认方案细节</div>
+          <div class="mt-badge badge-urgent">紧急</div>
+        </div>
+        <div class="mt">
+          <div class="mt-bar bar-high"></div>
+          <div class="mt-cb"></div>
+          <div class="mt-text">准备下周的产品评审</div>
+          <div class="mt-badge badge-high">重要</div>
+        </div>
+        <div class="mt">
+          <div class="mt-bar" style="background:transparent"></div>
+          <div class="mt-cb"></div>
+          <div class="mt-text">整理桌面文件夹</div>
+        </div>
+        <div class="mt done">
+          <div class="mt-bar" style="background:transparent"></div>
+          <div class="mt-cb">✓</div>
+          <div class="mt-text">给妈妈打电话</div>
+        </div>
+        <div class="mt done">
+          <div class="mt-bar" style="background:transparent"></div>
+          <div class="mt-cb">✓</div>
+          <div class="mt-text">买咖啡豆</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <p class="section-eyebrow">功能特性</p>
+  <h2 class="section-title">简洁，<br>但一点也不简单。</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">◈</div>
+      <div class="feature-title">优先级标记</div>
+      <div class="feature-desc">普通 / 重要 / 紧急三级优先级，让你一眼看清轻重缓急，聚焦最重要的事。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◑</div>
+      <div class="feature-title">深浅色模式</div>
+      <div class="feature-desc">护眼深色模式与清爽浅色模式，自由切换，适应你在任何光线下的工作环境。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⌘</div>
+      <div class="feature-title">多语言界面</div>
+      <div class="feature-desc">支持简体中文、English、日本語、Français、Español、한국어，六国语言任意切换。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">↓</div>
+      <div class="feature-title">文件导入导出</div>
+      <div class="feature-desc">任务数据以 JSON 格式导出保存，随时导入恢复，数据由你掌控，无需注册账号。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">▣</div>
+      <div class="feature-title">本地自动保存</div>
+      <div class="feature-desc">所有数据自动保存在浏览器本地，刷新后依然在，保护你的隐私。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✎</div>
+      <div class="feature-title">快速编辑</div>
+      <div class="feature-desc">点击编辑按钮即可直接修改任务内容，Enter 保存，无需弹窗，操作流畅自然。</div>
+    </div>
+  </div>
+</section>
+
+<section class="langs-section">
+  <div class="langs-inner">
+    <h2 class="langs-title">说你的语言</h2>
+    <div class="langs-grid">
+      <div class="lang-pill">🇨🇳 简体中文</div>
+      <div class="lang-pill">🇺🇸 English</div>
+      <div class="lang-pill">🇯🇵 日本語</div>
+      <div class="lang-pill">🇫🇷 Français</div>
+      <div class="lang-pill">🇪🇸 Español</div>
+      <div class="lang-pill">🇰🇷 한국어</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2 class="cta-title">开始整理，<br><em>从今天起</em>。</h2>
+  <p class="cta-sub">无需下载安装，打开浏览器即用。一个 HTML 文件，包含全部功能。</p>
+  <a class="btn-primary" href="todo-app.html">立即打开应用 →</a>
+</section>
+
+<footer>
+  <div class="footer-logo">清单<em>·</em>list</div>
+  <div class="footer-note">OPEN SOURCE · NO ADS · NO TRACKING · YOUR DATA STAYS WITH YOU</div>
+</footer>
+
+</body>
+</html>

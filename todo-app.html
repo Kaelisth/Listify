@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清单 · Listify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  /* ── CSS Variables ── */
+  :root {
+    --bg:         #F5F1EB;
+    --bg2:        #EDE9E2;
+    --surface:    #FFFFFF;
+    --border:     #D8D2C8;
+    --border-soft:#E8E3DA;
+    --text:       #1A1714;
+    --text-2:     #6B6560;
+    --text-3:     #9E9890;
+    --accent:     #8B6F47;
+    --accent-2:   #C49A6C;
+    --accent-bg:  #F0E8DC;
+    --done:       #B5B0A8;
+    --danger:     #C0574A;
+    --danger-bg:  #FAEAE8;
+    --shadow:     0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    --shadow-lg:  0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+    --radius:     10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+  [data-theme="dark"] {
+    --bg:         #161412;
+    --bg2:        #1E1C19;
+    --surface:    #252220;
+    --border:     #38342F;
+    --border-soft:#2E2B26;
+    --text:       #EDE9E2;
+    --text-2:     #9E9890;
+    --text-3:     #6B6560;
+    --accent:     #C49A6C;
+    --accent-2:   #8B6F47;
+    --accent-bg:  #2A2218;
+    --done:       #4A4640;
+    --danger:     #D4695C;
+    --danger-bg:  #2A1A18;
+    --shadow:     0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+    --shadow-lg:  0 2px 8px rgba(0,0,0,.4), 0 8px 32px rgba(0,0,0,.3);
+  }
+
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ── */
+  .app-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 0 0;
+    gap: 12px;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', 'Noto Sans SC', serif;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1;
+    user-select: none;
+  }
+  .logo span { color: var(--accent); font-style: italic; }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Language Switcher */
+  .lang-switcher {
+    position: relative;
+  }
+  .lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: .06em;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 100;
+    min-width: 130px;
+    display: none;
+    animation: fadeIn .15s ease;
+  }
+  .lang-dropdown.open { display: block; }
+  .lang-option {
+    padding: 9px 14px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    transition: background var(--transition);
+  }
+  .lang-option:hover, .lang-option.active { background: var(--accent-bg); color: var(--accent); }
+  .lang-option .flag { font-size: 1rem; }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    transition: all var(--transition);
+    font-size: 1rem;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Tagline ── */
+  .tagline {
+    margin: 20px 0 32px;
+    font-size: 0.78rem;
+    color: var(--text-3);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .stat { text-align: center; flex: 1; }
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.65rem; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; }
+  .stat-divider { width: 1px; background: var(--border-soft); }
+
+  /* ── Input Area ── */
+  .input-area {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color var(--transition);
+  }
+  .input-area:focus-within { border-color: var(--accent); }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .task-input {
+    flex: 1;
+    padding: 16px 18px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--text);
+    font-weight: 300;
+  }
+  .task-input::placeholder { color: var(--text-3); }
+  .add-btn {
+    padding: 12px 20px;
+    margin: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    letter-spacing: .08em;
+    font-weight: 400;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .add-btn:hover { background: var(--accent-2); transform: translateY(-1px); }
+  .add-btn:active { transform: translateY(0); }
+
+  /* Priority Row */
+  .priority-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px 12px;
+    flex-wrap: wrap;
+  }
+  .priority-label { font-size: 0.65rem; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; }
+  .priority-chip {
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 0.68rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    color: var(--text-2);
+    background: transparent;
+    font-family: inherit;
+  }
+  .priority-chip.selected-normal { background: var(--bg2); border-color: var(--border); color: var(--text); }
+  .priority-chip.selected-high { background: #FFF0E0; border-color: #E8A060; color: #B06020; }
+  .priority-chip.selected-urgent { background: #FAEAE8; border-color: var(--danger); color: var(--danger); }
+  [data-theme="dark"] .priority-chip.selected-high { background: #2A1E0A; }
+  [data-theme="dark"] .priority-chip.selected-urgent { background: var(--danger-bg); }
+
+  /* ── Filter Tabs ── */
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg2);
+    padding: 4px;
+    border-radius: 9px;
+  }
+  .filter-tab {
+    flex: 1;
+    padding: 7px;
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 6px;
+    color: var(--text-3);
+    transition: all var(--transition);
+    user-select: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+  }
+  .filter-tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── Task List ── */
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: all var(--transition);
+    animation: slideIn .2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .task-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background var(--transition);
+  }
+  .task-item.priority-high::before { background: #E8A060; }
+  .task-item.priority-urgent::before { background: var(--danger); }
+  .task-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); border-color: var(--border); }
+  .task-item.done { opacity: .55; }
+  .task-item.done:hover { opacity: .7; }
+
+  /* Checkbox */
+  .task-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all var(--transition);
+    background: transparent;
+  }
+  .task-check:hover { border-color: var(--accent); }
+  .task-item.done .task-check { background: var(--accent); border-color: var(--accent); }
+  .check-icon { font-size: 0.7rem; color: #fff; display: none; }
+  .task-item.done .check-icon { display: block; }
+
+  /* Task Content */
+  .task-content { flex: 1; min-width: 0; }
+  .task-text {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text);
+    transition: all var(--transition);
+    word-break: break-word;
+  }
+  .task-item.done .task-text {
+    text-decoration: line-through;
+    color: var(--done);
+  }
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .task-date { font-size: 0.65rem; color: var(--text-3); letter-spacing: .04em; }
+  .priority-badge {
+    font-size: 0.6rem;
+    padding: 1px 7px;
+    border-radius: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .pb-high { background: #FFF0E0; color: #B06020; }
+  .pb-urgent { background: #FAEAE8; color: var(--danger); }
+  [data-theme="dark"] .pb-high { background: #2A1E0A; }
+  [data-theme="dark"] .pb-urgent { background: var(--danger-bg); }
+
+  /* Task Actions */
+  .task-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--transition);
+    flex-shrink: 0;
+  }
+  .task-item:hover .task-actions { opacity: 1; }
+  .task-action-btn {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--text-3);
+    transition: all var(--transition);
+  }
+  .task-action-btn:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+  .task-action-btn.edit-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
+  /* Edit mode */
+  .task-edit-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--accent);
+    outline: none;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--text);
+    padding: 2px 0;
+    font-weight: 300;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-3);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: .4; }
+  .empty-text { font-size: 0.82rem; letter-spacing: .06em; }
+
+  /* ── Bottom Actions ── */
+  .bottom-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Animations ── */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .logo { font-size: 1.6rem; }
+    .stats-bar { gap: 10px; padding: 12px 14px; }
+    .stat-num { font-size: 1.2rem; }
+    .bottom-actions { gap: 6px; }
+    .action-btn { min-width: 90px; font-size: 0.65rem; padding: 9px 10px; }
+  }
+
+  /* ── Progress Bar ── */
+  .progress-wrap {
+    margin: 16px 0;
+    height: 3px;
+    background: var(--bg2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    border-radius: 2px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Header -->
+  <header>
+    <div class="logo">清单<span>·</span>list</div>
+    <div class="header-controls">
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn" id="langBtn" onclick="toggleLang()">
+          <span id="langFlag">🇨🇳</span>
+          <span id="langCode">中文</span>
+          <span>▾</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <div class="lang-option active" onclick="setLang('zh')"><span class="flag">🇨🇳</span> 简体中文</div>
+          <div class="lang-option" onclick="setLang('en')"><span class="flag">🇺🇸</span> English</div>
+          <div class="lang-option" onclick="setLang('ja')"><span class="flag">🇯🇵</span> 日本語</div>
+          <div class="lang-option" onclick="setLang('fr')"><span class="flag">🇫🇷</span> Français</div>
+          <div class="lang-option" onclick="setLang('es')"><span class="flag">🇪🇸</span> Español</div>
+          <div class="lang-option" onclick="setLang('ko')"><span class="flag">🇰🇷</span> 한국어</div>
+        </div>
+      </div>
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <p class="tagline" id="tagline">你的日子，从这里开始整理</p>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label" id="lblTotal">全部</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="statPending">0</div>
+      <div class="stat-label" id="lblPending">待完成</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="statDone">0</div>
+      <div class="stat-label" id="lblDone">已完成</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-row">
+      <input class="task-input" id="taskInput" type="text" placeholder="添加一件事..." maxlength="200"
+        onkeydown="if(event.key==='Enter')addTask()">
+      <button class="add-btn" id="addBtn" onclick="addTask()">添加</button>
+    </div>
+    <div class="priority-row">
+      <span class="priority-label" id="lblPriority">优先级</span>
+      <button class="priority-chip selected-normal" id="chipNormal" onclick="selectPriority('normal')">普通</button>
+      <button class="priority-chip" id="chipHigh" onclick="selectPriority('high')">重要</button>
+      <button class="priority-chip" id="chipUrgent" onclick="selectPriority('urgent')">紧急</button>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" id="tabAll" onclick="setFilter('all')">全部</button>
+    <button class="filter-tab" id="tabPending" onclick="setFilter('pending')">待完成</button>
+    <button class="filter-tab" id="tabDone" onclick="setFilter('done')">已完成</button>
+  </div>
+
+  <!-- Task List -->
+  <div class="task-list" id="taskList"></div>
+
+  <!-- Bottom Actions -->
+  <div class="bottom-actions">
+    <button class="action-btn" onclick="exportFile()">
+      <span>⬇</span> <span id="btnExport">导出文件</span>
+    </button>
+    <button class="action-btn" onclick="document.getElementById('importFile').click()">
+      <span>⬆</span> <span id="btnImport">导入文件</span>
+    </button>
+    <button class="action-btn danger" onclick="clearDone()">
+      <span>✕</span> <span id="btnClear">清除已完成</span>
+    </button>
+  </div>
+  <input type="file" id="importFile" accept=".json,.txt" style="display:none" onchange="importFile(event)">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── i18n ──
+const I18N = {
+  zh: {
+    tagline: '你的日子，从这里开始整理',
+    placeholder: '添加一件事...',
+    addBtn: '添加',
+    lblTotal: '全部', lblPending: '待完成', lblDone: '已完成',
+    lblPriority: '优先级',
+    chipNormal: '普通', chipHigh: '重要', chipUrgent: '紧急',
+    tabAll: '全部', tabPending: '待完成', tabDone: '已完成',
+    btnExport: '导出文件', btnImport: '导入文件', btnClear: '清除已完成',
+    emptyAll: '暂无任务', emptyPending: '没有待完成的任务', emptyDone: '没有已完成的任务',
+    toastAdded: '已添加', toastDeleted: '已删除', toastExported: '已导出',
+    toastImported: '已导入', toastCleared: '已清除', toastEmpty: '请输入内容',
+    pbHigh: '重要', pbUrgent: '紧急',
+    langCode: '中文', langFlag: '🇨🇳',
+  },
+  en: {
+    tagline: 'Your day, organized beautifully.',
+    placeholder: 'Add a new task...',
+    addBtn: 'Add',
+    lblTotal: 'Total', lblPending: 'Pending', lblDone: 'Done',
+    lblPriority: 'Priority',
+    chipNormal: 'Normal', chipHigh: 'Important', chipUrgent: 'Urgent',
+    tabAll: 'All', tabPending: 'Pending', tabDone: 'Done',
+    btnExport: 'Export', btnImport: 'Import', btnClear: 'Clear Done',
+    emptyAll: 'No tasks yet', emptyPending: 'Nothing pending', emptyDone: 'Nothing done yet',
+    toastAdded: 'Added', toastDeleted: 'Deleted', toastExported: 'Exported',
+    toastImported: 'Imported', toastCleared: 'Cleared', toastEmpty: 'Please enter something',
+    pbHigh: 'Important', pbUrgent: 'Urgent',
+    langCode: 'EN', langFlag: '🇺🇸',
+  },
+  ja: {
+    tagline: '今日のことを、ここから整理しよう。',
+    placeholder: 'タスクを追加...',
+    addBtn: '追加',
+    lblTotal: '合計', lblPending: '未完了', lblDone: '完了',
+    lblPriority: '優先度',
+    chipNormal: '普通', chipHigh: '重要', chipUrgent: '緊急',
+    tabAll: 'すべて', tabPending: '未完了', tabDone: '完了',
+    btnExport: 'エクスポート', btnImport: 'インポート', btnClear: '完了を削除',
+    emptyAll: 'タスクなし', emptyPending: '未完了なし', emptyDone: '完了なし',
+    toastAdded: '追加しました', toastDeleted: '削除しました', toastExported: 'エクスポートしました',
+    toastImported: 'インポートしました', toastCleared: '削除しました', toastEmpty: '内容を入力してください',
+    pbHigh: '重要', pbUrgent: '緊急',
+    langCode: '日本語', langFlag: '🇯🇵',
+  },
+  fr: {
+    tagline: 'Votre journée, organisée avec soin.',
+    placeholder: 'Ajouter une tâche...',
+    addBtn: 'Ajouter',
+    lblTotal: 'Total', lblPending: 'À faire', lblDone: 'Terminé',
+    lblPriority: 'Priorité',
+    chipNormal: 'Normal', chipHigh: 'Important', chipUrgent: 'Urgent',
+    tabAll: 'Tout', tabPending: 'À faire', tabDone: 'Terminé',
+    btnExport: 'Exporter', btnImport: 'Importer', btnClear: 'Effacer terminé',
+    emptyAll: 'Aucune tâche', emptyPending: 'Rien à faire', emptyDone: 'Rien de terminé',
+    toastAdded: 'Ajouté', toastDeleted: 'Supprimé', toastExported: 'Exporté',
+    toastImported: 'Importé', toastCleared: 'Effacé', toastEmpty: 'Veuillez saisir quelque chose',
+    pbHigh: 'Important', pbUrgent: 'Urgent',
+    langCode: 'FR', langFlag: '🇫🇷',
+  },
+  es: {
+    tagline: 'Tu día, organizado con elegancia.',
+    placeholder: 'Agregar tarea...',
+    addBtn: 'Agregar',
+    lblTotal: 'Total', lblPending: 'Pendiente', lblDone: 'Hecho',
+    lblPriority: 'Prioridad',
+    chipNormal: 'Normal', chipHigh: 'Importante', chipUrgent: 'Urgente',
+    tabAll: 'Todo', tabPending: 'Pendiente', tabDone: 'Hecho',
+    btnExport: 'Exportar', btnImport: 'Importar', btnClear: 'Limpiar hechos',
+    emptyAll: 'Sin tareas', emptyPending: 'Nada pendiente', emptyDone: 'Nada hecho',
+    toastAdded: 'Agregado', toastDeleted: 'Eliminado', toastExported: 'Exportado',
+    toastImported: 'Importado', toastCleared: 'Limpiado', toastEmpty: 'Por favor ingrese algo',
+    pbHigh: 'Importante', pbUrgent: 'Urgente',
+    langCode: 'ES', langFlag: '🇪🇸',
+  },
+  ko: {
+    tagline: '오늘 하루, 여기서 정리해 보세요.',
+    placeholder: '할 일 추가...',
+    addBtn: '추가',
+    lblTotal: '전체', lblPending: '미완료', lblDone: '완료',
+    lblPriority: '우선순위',
+    chipNormal: '보통', chipHigh: '중요', chipUrgent: '긴급',
+    tabAll: '전체', tabPending: '미완료', tabDone: '완료',
+    btnExport: '내보내기', btnImport: '가져오기', btnClear: '완료 삭제',
+    emptyAll: '할 일 없음', emptyPending: '미완료 없음', emptyDone: '완료 없음',
+    toastAdded: '추가됨', toastDeleted: '삭제됨', toastExported: '내보내기 완료',
+    toastImported: '가져오기 완료', toastCleared: '삭제됨', toastEmpty: '내용을 입력해주세요',
+    pbHigh: '중요', pbUrgent: '긴급',
+    langCode: '한국어', langFlag: '🇰🇷',
+  },
+};
+
+// ── State ──
+let tasks = [];
+let currentLang = 'zh';
+let currentFilter = 'all';
+let currentPriority = 'normal';
+let isDark = false;
+
+// ── Init ──
+function init() {
+  const saved = localStorage.getItem('listify_tasks');
+  if (saved) tasks = JSON.parse(saved);
+  const savedLang = localStorage.getItem('listify_lang') || 'zh';
+  const savedTheme = localStorage.getItem('listify_theme') || 'light';
+  isDark = savedTheme === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  setLang(savedLang, false);
+  render();
+}
+
+// ── Language ──
+function toggleLang() {
+  const dd = document.getElementById('langDropdown');
+  dd.classList.toggle('open');
+}
+function setLang(lang, save=true) {
+  currentLang = lang;
+  const t = I18N[lang];
+  document.getElementById('tagline').textContent = t.tagline;
+  document.getElementById('taskInput').placeholder = t.placeholder;
+  document.getElementById('addBtn').textContent = t.addBtn;
+  document.getElementById('lblTotal').textContent = t.lblTotal;
+  document.getElementById('lblPending').textContent = t.lblPending;
+  document.getElementById('lblDone').textContent = t.lblDone;
+  document.getElementById('lblPriority').textContent = t.lblPriority;
+  document.getElementById('chipNormal').textContent = t.chipNormal;
+  document.getElementById('chipHigh').textContent = t.chipHigh;
+  document.getElementById('chipUrgent').textContent = t.chipUrgent;
+  document.getElementById('tabAll').textContent = t.tabAll;
+  document.getElementById('tabPending').textContent = t.tabPending;
+  document.getElementById('tabDone').textContent = t.tabDone;
+  document.getElementById('btnExport').textContent = t.btnExport;
+  document.getElementById('btnImport').textContent = t.btnImport;
+  document.getElementById('btnClear').textContent = t.btnClear;
+  document.getElementById('langCode').textContent = t.langCode;
+  document.getElementById('langFlag').textContent = t.langFlag;
+  document.querySelectorAll('.lang-option').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.lang-option').forEach(el => {
+    if (el.onclick.toString().includes(`'${lang}'`)) el.classList.add('active');
+  });
+  document.getElementById('langDropdown').classList.remove('open');
+  document.documentElement.lang = lang;
+  if (save) localStorage.setItem('listify_lang', lang);
+  render();
+}
+
+// ── Theme ──
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('listify_theme', isDark ? 'dark' : 'light');
+}
+
+// ── Priority ──
+function selectPriority(p) {
+  currentPriority = p;
+  ['normal','high','urgent'].forEach(x => {
+    const chip = document.getElementById('chip'+x.charAt(0).toUpperCase()+x.slice(1));
+    chip.className = 'priority-chip' + (x === p ? ` selected-${x}` : '');
+  });
+}
+
+// ── Add Task ──
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const text = input.value.trim();
+  const t = I18N[currentLang];
+  if (!text) { showToast(t.toastEmpty); return; }
+  tasks.unshift({
+    id: Date.now(),
+    text,
+    done: false,
+    priority: currentPriority,
+    createdAt: new Date().toLocaleDateString(currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : 'zh-CN'),
+  });
+  input.value = '';
+  save();
+  render();
+  showToast(t.toastAdded + ' ✓');
+}
+
+// ── Toggle Done ──
+function toggleDone(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) { task.done = !task.done; save(); render(); }
+}
+
+// ── Delete ──
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
+  render();
+  showToast(I18N[currentLang].toastDeleted);
+}
+
+// ── Edit ──
+function startEdit(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  const textEl = document.getElementById('text-' + id);
+  const input = document.createElement('input');
+  input.className = 'task-edit-input';
+  input.value = task.text;
+  textEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const finish = () => {
+    const v = input.value.trim();
+    if (v) task.text = v;
+    save(); render();
+  };
+  input.onblur = finish;
+  input.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); finish(); } if (e.key === 'Escape') render(); };
+}
+
+// ── Filter ──
+function setFilter(f) {
+  currentFilter = f;
+  ['all','pending','done'].forEach(x => {
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1))
+      .classList.toggle('active', x === f);
+  });
+  render();
+}
+
+// ── Render ──
+function render() {
+  const t = I18N[currentLang];
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  const pending = total - done;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statDone').textContent = done;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  let filtered = tasks;
+  if (currentFilter === 'pending') filtered = tasks.filter(t => !t.done);
+  if (currentFilter === 'done') filtered = tasks.filter(t => t.done);
+
+  // Sort: urgent > high > normal, undone first
+  filtered = [...filtered].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const pOrder = { urgent: 0, high: 1, normal: 2 };
+    return pOrder[a.priority] - pOrder[b.priority];
+  });
+
+  const list = document.getElementById('taskList');
+  if (filtered.length === 0) {
+    const empties = { all: t.emptyAll, pending: t.emptyPending, done: t.emptyDone };
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">◇</div><div class="empty-text">${empties[currentFilter]}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(task => {
+    const pbHtml = task.priority !== 'normal'
+      ? `<span class="priority-badge pb-${task.priority}">${task.priority === 'high' ? t.pbHigh : t.pbUrgent}</span>`
+      : '';
+    return `
+    <div class="task-item ${task.done ? 'done' : ''} priority-${task.priority}" id="item-${task.id}">
+      <div class="task-check" onclick="toggleDone(${task.id})">
+        <span class="check-icon">✓</span>
+      </div>
+      <div class="task-content">
+        <div class="task-text" id="text-${task.id}">${escHtml(task.text)}</div>
+        <div class="task-meta">
+          <span class="task-date">${task.createdAt || ''}</span>
+          ${pbHtml}
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="task-action-btn edit-btn" onclick="startEdit(${task.id})" title="Edit">✎</button>
+        <button class="task-action-btn" onclick="deleteTask(${task.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Save ──
+function save() {
+  localStorage.setItem('listify_tasks', JSON.stringify(tasks));
+}
+
+// ── Export ──
+function exportFile() {
+  const data = { version: '1.0', lang: currentLang, exportedAt: new Date().toISOString(), tasks };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `listify-${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.json`;
+  a.click();
+  showToast(I18N[currentLang].toastExported + ' ↓');
+}
+
+// ── Import ──
+function importFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      let data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) tasks = data;
+      else if (data.tasks) tasks = data.tasks;
+      save(); render();
+      showToast(I18N[currentLang].toastImported + ' ↑');
+    } catch { showToast('⚠ Invalid file'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── Clear Done ──
+function clearDone() {
+  tasks = tasks.filter(t => !t.done);
+  save(); render();
+  showToast(I18N[currentLang].toastCleared);
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Close dropdown on outside click ──
+document.addEventListener('click', e => {
+  if (!e.target.closest('.lang-switcher')) {
+    document.getElementById('langDropdown').classList.remove('open');
+  }
+});
+
+init();
+</script>
+</body>
+</html>
